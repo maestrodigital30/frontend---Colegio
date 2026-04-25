@@ -1,0 +1,347 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   AURORA ACADEMICA - Light Theme System
+   Dynamic Color Palette
+   ============================================ */
+
+:root {
+  /* Base hex colors (overridden by system config) */
+  --color-primary: #1976D2;
+  --color-secondary: #42A5F5;
+  --color-accent: #0D47A1;
+
+  /* Primary palette — #1976D2 (RGB space-separated for Tailwind alpha) */
+  --color-primary-50: 232 245 253;
+  --color-primary-100: 209 234 250;
+  --color-primary-200: 166 213 245;
+  --color-primary-300: 110 185 238;
+  --color-primary-400: 56 156 228;
+  --color-primary-500: 25 118 210;
+  --color-primary-600: 21 101 182;
+  --color-primary-700: 17 82 150;
+  --color-primary-800: 13 64 118;
+  --color-primary-900: 10 48 90;
+  --color-primary-950: 6 28 52;
+
+  /* Secondary palette — #42A5F5 */
+  --color-secondary-50: 237 248 255;
+  --color-secondary-100: 220 241 254;
+  --color-secondary-200: 186 228 253;
+  --color-secondary-300: 140 208 250;
+  --color-secondary-400: 90 184 247;
+  --color-secondary-500: 66 165 245;
+  --color-secondary-600: 40 138 218;
+  --color-secondary-700: 28 110 182;
+  --color-secondary-800: 20 86 145;
+  --color-secondary-900: 14 65 110;
+  --color-secondary-950: 8 38 64;
+
+  /* Accent palette — #0D47A1 */
+  --color-accent-50: 232 240 250;
+  --color-accent-100: 210 226 245;
+  --color-accent-200: 165 197 235;
+  --color-accent-300: 110 162 222;
+  --color-accent-400: 55 120 200;
+  --color-accent-500: 13 71 161;
+  --color-accent-600: 11 60 138;
+  --color-accent-700: 9 49 114;
+  --color-accent-800: 7 38 90;
+  --color-accent-900: 5 29 68;
+  --color-accent-950: 3 17 40;
+
+  /* Light palette */
+  --aurora-deep: #f8fafc;
+  --aurora-base: #f1f5f9;
+  --aurora-surface: #ffffff;
+  --aurora-elevated: #f8fafc;
+  --aurora-card: rgba(255, 255, 255, 0.85);
+  --aurora-card-hover: rgba(255, 255, 255, 0.95);
+  --aurora-border: rgba(0, 0, 0, 0.08);
+  --aurora-border-hover: rgba(0, 0, 0, 0.14);
+  --aurora-glass: rgba(255, 255, 255, 0.9);
+  --aurora-text: #1e293b;
+  --aurora-text-muted: #475569;
+  --aurora-text-dim: #94a3b8;
+}
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: var(--aurora-deep);
+    color: var(--aurora-text);
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', system-ui, sans-serif;
+  }
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================
+   ANIMATED BACKGROUND (Aurora Mesh - Light)
+   Uses dynamic color variables
+   ============================================ */
+.aurora-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.aurora-bg::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 20%, rgb(var(--color-primary-500) / 0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 80% 30%, rgb(var(--color-secondary-500) / 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse 70% 50% at 50% 80%, rgb(var(--color-accent-500) / 0.06) 0%, transparent 50%);
+  animation: auroraShift 20s ease-in-out infinite alternate;
+}
+
+.aurora-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.02'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  opacity: 0.4;
+}
+
+@keyframes auroraShift {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(3deg) scale(1.05); }
+  100% { transform: rotate(-2deg) scale(1.02); }
+}
+
+/* Floating orbs - dynamic colors */
+.aurora-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  animation: orbFloat 25s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.aurora-orb-1 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgb(var(--color-primary-500) / 0.12), transparent 70%);
+  top: -10%;
+  left: -5%;
+  animation-delay: 0s;
+}
+
+.aurora-orb-2 {
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgb(var(--color-secondary-500) / 0.10), transparent 70%);
+  top: 40%;
+  right: -5%;
+  animation-delay: -8s;
+  animation-duration: 30s;
+}
+
+.aurora-orb-3 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgb(var(--color-accent-500) / 0.08), transparent 70%);
+  bottom: -5%;
+  left: 30%;
+  animation-delay: -15s;
+  animation-duration: 22s;
+}
+
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -20px) scale(1.05); }
+  50% { transform: translate(-20px, 30px) scale(0.95); }
+  75% { transform: translate(20px, 15px) scale(1.02); }
+}
+
+/* ============================================
+   GLASS CARD SYSTEM (Light)
+   ============================================ */
+.glass-card {
+  background: var(--aurora-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--aurora-border);
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  background: var(--aurora-card-hover);
+  border-color: var(--aurora-border-hover);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.04);
+}
+
+.glass-card-static {
+  background: var(--aurora-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--aurora-border);
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+/* ============================================
+   GLOW EFFECTS (dynamic)
+   ============================================ */
+.glow-primary {
+  box-shadow: 0 2px 12px rgb(var(--color-primary-500) / 0.12), 0 0 40px rgb(var(--color-primary-500) / 0.06);
+}
+
+.glow-secondary {
+  box-shadow: 0 2px 12px rgb(var(--color-secondary-500) / 0.12), 0 0 40px rgb(var(--color-secondary-500) / 0.06);
+}
+
+.glow-accent {
+  box-shadow: 0 2px 12px rgb(var(--color-accent-500) / 0.12), 0 0 40px rgb(var(--color-accent-500) / 0.06);
+}
+
+/* ============================================
+   ENTRANCE ANIMATIONS
+   ============================================ */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeSlideRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 5px rgb(var(--color-primary-500) / 0.15); }
+  50% { box-shadow: 0 0 20px rgb(var(--color-primary-500) / 0.25), 0 0 40px rgb(var(--color-primary-500) / 0.08); }
+}
+
+.animate-fade-up {
+  animation: fadeSlideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.animate-fade-right {
+  animation: fadeSlideRight 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* Stagger children */
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger-children > *:nth-child(8) { animation-delay: 0.4s; }
+
+/* ============================================
+   GRADIENT TEXT (dynamic)
+   ============================================ */
+.gradient-text {
+  background: linear-gradient(135deg, rgb(var(--color-primary-700)), rgb(var(--color-primary-500)), rgb(var(--color-primary-700)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-secondary {
+  background: linear-gradient(135deg, rgb(var(--color-secondary-700)), rgb(var(--color-secondary-500)), rgb(var(--color-secondary-700)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================
+   SELECTION (dynamic)
+   ============================================ */
+::selection {
+  background: rgb(var(--color-primary-500) / 0.2);
+  color: rgb(var(--color-primary-900));
+}
+
+/* ============================================
+   TOAST OVERRIDES
+   ============================================ */
+[data-sonner-toaster],
+div[role="status"] {
+  font-family: 'DM Sans', system-ui, sans-serif !important;
+}
