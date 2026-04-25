@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Environment variables (use Railway/host env in production; .env.example for reference)
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
