@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import apiClient from '../../services/apiClient';
 import Boton from '../../components/common/Boton';
 import InputCampo from '../../components/common/InputCampo';
+import WhatsappEnvioMasivo from '../../components/common/WhatsappEnvioMasivo';
 import { formatearFechaHora, fechaHoy } from '../../utils/formatters';
 import { TIPOS_REPORTE_WHATSAPP } from '../../utils/constants';
+import { HiPaperAirplane, HiClock, HiUsers } from 'react-icons/hi';
 import toast from 'react-hot-toast';
 
 const OPCIONES_REPORTE = [
@@ -78,20 +80,32 @@ export default function WhatsappDocentePage() {
         <p className="text-xs font-display font-medium text-secondary-600 uppercase tracking-widest mb-1">Comunicación</p>
         <h1 className="text-3xl font-display font-bold text-slate-800">WhatsApp - Reportes</h1>
       </div>
-      <div className="flex gap-2 mb-6">
-        <Boton tipo={vista === 'enviar' ? 'primary' : 'outline'} onClick={() => setVista('enviar')}>Enviar</Boton>
-        <Boton tipo={vista === 'historial' ? 'primary' : 'outline'} onClick={() => setVista('historial')}>Historial</Boton>
+      <div className="flex gap-2 mb-6 flex-wrap">
+        <Boton tipo={vista === 'enviar' ? 'secondary' : 'outline'} onClick={() => setVista('enviar')}>
+          <HiPaperAirplane className="w-4 h-4 mr-1.5 inline-block" />Enviar por curso
+        </Boton>
+        <Boton tipo={vista === 'masivo' ? 'secondary' : 'outline'} onClick={() => setVista('masivo')}>
+          <HiUsers className="w-4 h-4 mr-1.5 inline-block" />Envío masivo por grado
+        </Boton>
+        <Boton tipo={vista === 'historial' ? 'secondary' : 'outline'} onClick={() => setVista('historial')}>
+          <HiClock className="w-4 h-4 mr-1.5 inline-block" />Historial
+        </Boton>
       </div>
-      <div className="flex flex-wrap gap-4 mb-6">
-        <div className="w-72">
-          <InputCampo label="Curso" name="curso" type="select" value={cursoSel} onChange={(e) => setCursoSel(e.target.value)} options={cursos.filter(c => c.estado === 1).map(c => ({ value: c.id.toString(), label: `${c.nombre} - ${c.grado || ''} ${c.seccion || ''}` }))} />
-        </div>
-        {vista === 'enviar' && (
-          <div className="w-56">
-            <InputCampo label="Periodo" name="periodo" type="select" value={periodoSel} onChange={(e) => setPeriodoSel(e.target.value)} options={periodos.filter(p => p.estado === 1).map(p => ({ value: p.id.toString(), label: p.nombre }))} />
+
+      {(vista === 'enviar' || vista === 'historial') && (
+        <div className="flex flex-wrap gap-4 mb-6">
+          <div className="w-72">
+            <InputCampo label="Curso" name="curso" type="select" value={cursoSel} onChange={(e) => setCursoSel(e.target.value)} options={cursos.filter(c => c.estado === 1).map(c => ({ value: c.id.toString(), label: `${c.nombre} - ${c.grado || ''} ${c.seccion || ''}` }))} />
           </div>
-        )}
-      </div>
+          {vista === 'enviar' && (
+            <div className="w-56">
+              <InputCampo label="Periodo" name="periodo" type="select" value={periodoSel} onChange={(e) => setPeriodoSel(e.target.value)} options={periodos.filter(p => p.estado === 1).map(p => ({ value: p.id.toString(), label: p.nombre }))} />
+            </div>
+          )}
+        </div>
+      )}
+
+      {vista === 'masivo' && <WhatsappEnvioMasivo acento="secondary" />}
 
       {vista === 'enviar' && (
         <div className="glass-card-static p-6">
