@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import apiClient from '../../services/apiClient';
-import { getUploadUrl } from '../../utils/storage';
+import { getUploadUrl, getDownloadUrl } from '../../utils/storage';
 import { embedYoutube, esUrlYoutube } from '../../utils/youtube';
 import Modal from '../../components/common/Modal';
 import toast from 'react-hot-toast';
@@ -164,7 +164,7 @@ export default function BibliotecaAlumno() {
                       <HiExternalLink className="w-3.5 h-3.5" /> Abrir
                     </a>
                   ) : (
-                    <a href={getUploadUrl(m.ruta_archivo)} download={m.nombre_archivo_original} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-primary-600 hover:bg-primary-50 rounded-lg transition-colors">
+                    <a href={getDownloadUrl(m.ruta_archivo, m.nombre_archivo_original)} download={m.nombre_archivo_original} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-primary-600 hover:bg-primary-50 rounded-lg transition-colors">
                       <HiDownload className="w-3.5 h-3.5" /> Descargar
                     </a>
                   )}
@@ -218,7 +218,7 @@ export default function BibliotecaAlumno() {
                     <HiExternalLink className="w-4 h-4" /> Abrir
                   </a>
                 ) : (
-                  <a href={getUploadUrl(materialPreview.ruta_archivo)} download={materialPreview.nombre_archivo_original} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-colors flex-shrink-0">
+                  <a href={getDownloadUrl(materialPreview.ruta_archivo, materialPreview.nombre_archivo_original)} download={materialPreview.nombre_archivo_original} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-colors flex-shrink-0">
                     <HiDownload className="w-4 h-4" /> Descargar
                   </a>
                 )}

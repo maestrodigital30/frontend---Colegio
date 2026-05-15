@@ -2,7 +2,7 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { ESTADOS_ASISTENCIA } from './constants';
-import { formatearFecha } from './formatters';
+import { formatearFecha, fechaHoy } from './formatters';
 
 const CODIGO_ESTADO = {
   [ESTADOS_ASISTENCIA.PRESENTE]: 'P',
@@ -81,8 +81,8 @@ const construirNombreArchivo = (meta, extension) => {
     'asistencia',
     slug(meta.cursoNombre),
     meta.alumnoNombre ? slug(meta.alumnoNombre) : null,
-    meta.rango?.from ? meta.rango.from.toISOString().split('T')[0] : 'todo',
-    meta.rango?.to ? meta.rango.to.toISOString().split('T')[0] : '',
+    meta.rango?.from ? fechaHoy(meta.rango.from) : 'todo',
+    meta.rango?.to ? fechaHoy(meta.rango.to) : '',
   ].filter(Boolean);
   return `${partes.join('_')}.${extension}`;
 };

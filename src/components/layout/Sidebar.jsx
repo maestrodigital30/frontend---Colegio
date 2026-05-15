@@ -5,7 +5,8 @@ import { getUploadUrl } from '../../utils/storage';
 import {
   HiHome, HiUsers, HiAcademicCap, HiCalendar, HiBookOpen, HiUserGroup,
   HiClipboardCheck, HiCog, HiDocumentText, HiChat, HiPuzzle, HiChartBar,
-  HiCreditCard, HiQrcode, HiClock, HiStar, HiMicrophone, HiUser, HiCollection
+  HiCreditCard, HiQrcode, HiClock, HiStar, HiMicrophone, HiUser, HiCollection,
+  HiClipboardList
 } from 'react-icons/hi';
 
 const menuAdmin = [
@@ -16,6 +17,7 @@ const menuAdmin = [
   { to: '/admin/periodos', label: 'Periodos', icono: HiCalendar },
   { to: '/admin/cursos', label: 'Cursos', icono: HiBookOpen },
   { to: '/admin/alumnos', label: 'Alumnos', icono: HiUserGroup },
+  { to: '/admin/datos-antropometricos', label: 'Datos Antropometricos', icono: HiClipboardList },
   { to: '/admin/padres', label: 'Padres', icono: HiUsers },
   { to: '/admin/carnets', label: 'Carnets QR', icono: HiQrcode },
   { to: '/admin/asistencia', label: 'Asistencia', icono: HiClipboardCheck },

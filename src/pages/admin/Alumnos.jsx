@@ -6,8 +6,9 @@ import Tabla from '../../components/common/Tabla';
 import Boton from '../../components/common/Boton';
 import Modal from '../../components/common/Modal';
 import InputCampo from '../../components/common/InputCampo';
-import { HiPencil, HiBan, HiCheckCircle, HiRefresh, HiUser, HiQrcode } from 'react-icons/hi';
-import { formatearFecha } from '../../utils/formatters';
+import ModalDatosAntropometricos from '../../components/alumnos/ModalDatosAntropometricos';
+import { HiPencil, HiBan, HiCheckCircle, HiRefresh, HiUser, HiQrcode, HiClipboardList } from 'react-icons/hi';
+import { formatearFecha, fechaHoy } from '../../utils/formatters';
 import toast from 'react-hot-toast';
 
 export default function AlumnosPage() {
@@ -17,6 +18,7 @@ export default function AlumnosPage() {
   const [modal, setModal] = useState(false);
   const [modalCursos, setModalCursos] = useState(false);
   const [modalCredenciales, setModalCredenciales] = useState(false);
+  const [modalAntropometricos, setModalAntropometricos] = useState(false);
   const [credencialesInfo, setCredencialesInfo] = useState(null);
   const [editando, setEditando] = useState(null);
   const [alumnoSel, setAlumnoSel] = useState(null);
@@ -87,11 +89,8 @@ export default function AlumnosPage() {
     }
     if (!form.fecha_nacimiento) {
       nuevosErrores.fecha_nacimiento = 'La fecha de nacimiento es obligatoria';
-    } else {
-      const fecha = new Date(form.fecha_nacimiento);
-      if (isNaN(fecha.getTime()) || fecha >= new Date()) {
-        nuevosErrores.fecha_nacimiento = 'La fecha de nacimiento debe ser anterior a hoy';
-      }
+    } else if (!/^\d{4}-\d{2}-\d{2}$/.test(form.fecha_nacimiento) || form.fecha_nacimiento >= fechaHoy()) {
+      nuevosErrores.fecha_nacimiento = 'La fecha de nacimiento debe ser anterior a hoy';
     }
     if (!form.genero) {
       nuevosErrores.genero = 'El género es obligatorio';
@@ -147,6 +146,11 @@ export default function AlumnosPage() {
     const cursosActuales = a.tbl_alumnos_cursos?.filter(ac => ac.estado === 1).map(ac => ac.id_curso.toString()) || [];
     setCursosSeleccionados(cursosActuales);
     setModalCursos(true);
+  };
+
+  const abrirAntropometricos = (a) => {
+    setAlumnoSel(a);
+    setModalAntropometricos(true);
   };
 
   const handleFotoChange = (e) => {
@@ -257,6 +261,7 @@ export default function AlumnosPage() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
           </button>
           <button onClick={() => handleRegenerarCarnet(fila)} className="p-1 text-primary-600 hover:bg-slate-50 rounded" title="Regenerar Carnet"><HiRefresh className="w-4 h-4" /></button>
+          <button onClick={() => abrirAntropometricos(fila)} className="p-1 text-accent-500 hover:bg-slate-50 rounded" title="Datos Antropométricos"><HiClipboardList className="w-4 h-4" /></button>
           {fila.estado === 1 ? (
             <button onClick={() => handleToggleEstado(fila)} className="p-1 text-rose-400 hover:bg-slate-50 rounded" title="Desactivar"><HiBan className="w-4 h-4" /></button>
           ) : (
@@ -367,6 +372,12 @@ export default function AlumnosPage() {
           <Boton onClick={handleAsignarCursos}>Guardar</Boton>
         </div>
       </Modal>
+
+      <ModalDatosAntropometricos
+        abierto={modalAntropometricos}
+        cerrar={() => setModalAntropometricos(false)}
+        alumno={alumnoSel}
+      />
 
       {/* Modal credenciales generadas */}
       <Modal abierto={modalCredenciales} cerrar={() => { setModalCredenciales(false); setCredencialesInfo(null); }} titulo="Credenciales del Alumno">

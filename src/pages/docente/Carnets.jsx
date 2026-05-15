@@ -6,8 +6,9 @@ import InputCampo from '../../components/common/InputCampo';
 import Boton from '../../components/common/Boton';
 import { QRCodeSVG } from 'qrcode.react';
 import { HiPrinter, HiX, HiEye, HiUser } from 'react-icons/hi';
+import { anioActual } from '../../utils/formatters';
 
-const ANIO_ESCOLAR = new Date().getFullYear();
+const ANIO_ESCOLAR = anioActual();
 const AZUL = '#0060FF';
 const CELESTE = '#87CEEB';
 

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { HiClipboardCheck, HiCalendar, HiViewList, HiChevronLeft, HiChevronRight } from 'react-icons/hi';
 import apiClient from '../../services/apiClient';
 import { ESTADOS_ASISTENCIA } from '../../utils/constants';
+import { fechaHoy } from '../../utils/formatters';
 
 const ESTILOS_ESTADO = {
   [ESTADOS_ASISTENCIA.PRESENTE]: 'bg-emerald-200 text-emerald-800 border-emerald-300 font-bold',
@@ -43,8 +44,12 @@ function CalendarioAsistencia({ registros, mesActual, setMesActual }) {
   for (let i = 0; i < diaInicio; i++) celdas.push(null);
   for (let d = 1; d <= diasEnMes; d++) celdas.push(d);
 
-  const hoy = new Date();
-  const esHoy = (d) => d && hoy.getFullYear() === anio && hoy.getMonth() === mes && hoy.getDate() === d;
+  const hoyISO = fechaHoy();
+  const esHoy = (d) => {
+    if (!d) return false;
+    const key = `${anio}-${String(mes + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    return key === hoyISO;
+  };
 
   const obtenerEstadoDia = (d) => {
     if (!d) return null;

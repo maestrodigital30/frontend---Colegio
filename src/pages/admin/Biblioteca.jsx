@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import apiClient from '../../services/apiClient';
-import { getUploadUrl } from '../../utils/storage';
+import { getUploadUrl, getDownloadUrl } from '../../utils/storage';
 import { DEFAULT_COLORS } from '../../utils/colorUtils';
 import { embedYoutube, esUrlYoutube } from '../../utils/youtube';
 import Modal from '../../components/common/Modal';
@@ -344,7 +344,7 @@ export default function BibliotecaAdmin() {
                         </a>
                       ) : (
                         <a
-                          href={getUploadUrl(m.ruta_archivo)}
+                          href={getDownloadUrl(m.ruta_archivo, m.nombre_archivo_original)}
                           download={m.nombre_archivo_original}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -623,7 +623,7 @@ export default function BibliotecaAdmin() {
                   </a>
                 ) : (
                   <a
-                    href={getUploadUrl(materialPreview.ruta_archivo)}
+                    href={getDownloadUrl(materialPreview.ruta_archivo, materialPreview.nombre_archivo_original)}
                     download={materialPreview.nombre_archivo_original}
                     target="_blank"
                     rel="noopener noreferrer"

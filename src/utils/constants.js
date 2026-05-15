@@ -59,6 +59,11 @@ export const MODOS_NOTA_FINAL = {
   MANUAL: 'manual',
 };
 
+export const TIPOS_VALOR_ANTROPOMETRICO = {
+  NUMERICO: 'numerico',
+  TEXTO: 'texto',
+};
+
 export const ES_DESARROLLO = import.meta.env.DEV;
 
 export const API_URL = import.meta.env.VITE_API_URL;

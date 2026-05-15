@@ -7,6 +7,7 @@ import InputCampo from '../../components/common/InputCampo';
 import Modal from '../../components/common/Modal';
 import { HiPencil, HiTrash, HiMicrophone, HiPlay, HiLink, HiFolder, HiCalendar, HiPhotograph, HiUpload, HiX, HiPlus, HiSearch, HiFilter } from 'react-icons/hi';
 import toast from 'react-hot-toast';
+import { fechaHoy } from '../../utils/formatters';
 
 export default function PodcastAdminPage() {
   const [tab, setTab] = useState('entradas');
@@ -93,7 +94,7 @@ export default function PodcastAdminPage() {
   // ─── Entradas CRUD ───
   const abrirCrearEntrada = () => {
     setEditandoEntrada(null);
-    setFormEntrada({ titulo: '', descripcion: '', url: '', tipo: 'youtube', id_categoria: '', fecha_publicacion: new Date().toISOString().split('T')[0] });
+    setFormEntrada({ titulo: '', descripcion: '', url: '', tipo: 'youtube', id_categoria: '', fecha_publicacion: fechaHoy() });
     setModalEntrada(true);
   };
 

@@ -5,14 +5,14 @@ import Boton from '../../components/common/Boton';
 import Modal from '../../components/common/Modal';
 import InputCampo from '../../components/common/InputCampo';
 import { HiPencil, HiBan, HiCheckCircle } from 'react-icons/hi';
-import { formatearFecha } from '../../utils/formatters';
+import { formatearFecha, anioActual } from '../../utils/formatters';
 import toast from 'react-hot-toast';
 
 export default function PeriodosPage() {
   const { datos, cargando, crear, actualizar, inactivar, activar } = useCrud('/periodos');
   const [modal, setModal] = useState(false);
   const [editando, setEditando] = useState(null);
-  const [form, setForm] = useState({ nombre: '', anio: new Date().getFullYear(), fecha_inicio: '', fecha_fin: '' });
+  const [form, setForm] = useState({ nombre: '', anio: anioActual(), fecha_inicio: '', fecha_fin: '' });
 
   const columnas = [
     { key: 'id', label: 'ID' },
@@ -54,7 +54,7 @@ export default function PeriodosPage() {
 
   const abrirCrear = () => {
     setEditando(null);
-    setForm({ nombre: '', anio: new Date().getFullYear(), fecha_inicio: '', fecha_fin: '' });
+    setForm({ nombre: '', anio: anioActual(), fecha_inicio: '', fecha_fin: '' });
     setModal(true);
   };
 

@@ -18,6 +18,7 @@ import ProfesoresPage from '../pages/admin/Profesores';
 import PeriodosAdminPage from '../pages/admin/Periodos';
 import CursosAdminPage from '../pages/admin/Cursos';
 import AlumnosAdminPage from '../pages/admin/Alumnos';
+import DatosAntropometricosAdminPage from '../pages/admin/DatosAntropometricos';
 import PadresAdminPage from '../pages/admin/Padres';
 import AsistenciaAdminPage from '../pages/admin/Asistencia';
 import ConfigAcademicaAdminPage from '../pages/admin/ConfigAcademica';
@@ -82,6 +83,7 @@ export default function AppRoutes() {
         <Route path="periodos" element={<PeriodosAdminPage />} />
         <Route path="cursos" element={<CursosAdminPage />} />
         <Route path="alumnos" element={<AlumnosAdminPage />} />
+        <Route path="datos-antropometricos" element={<DatosAntropometricosAdminPage />} />
         <Route path="padres" element={<PadresAdminPage />} />
         <Route path="carnets" element={<CarnetsPage />} />
         <Route path="asistencia" element={<AsistenciaAdminPage />} />

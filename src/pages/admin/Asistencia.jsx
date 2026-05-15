@@ -55,16 +55,11 @@ export default function AsistenciaPage() {
     } catch { setHistorial([]); }
   };
 
-  const fechaLocalAISO = (d) => {
-    const x = new Date(d);
-    return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
-  };
-
   const historialFiltrado = useMemo(() => {
     let base = historial;
     if (rango?.from && rango?.to) {
-      const desde = fechaLocalAISO(rango.from);
-      const hasta = fechaLocalAISO(rango.to);
+      const desde = fechaHoy(rango.from);
+      const hasta = fechaHoy(rango.to);
       base = base.filter((s) => {
         const f = (s.fecha_asistencia || '').slice(0, 10);
         return f >= desde && f <= hasta;

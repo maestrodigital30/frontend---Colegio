@@ -55,7 +55,6 @@ export default function TriviaJugarPage() {
 
         // Intentar cargar presentes del día
         try {
-          const hoy = new Date().toISOString().split('T')[0];
           const { data: asistencia } = await apiClient.get(`/asistencia/historial/${cursoSel}`);
           const presentes = asistencia
             .filter(r => r.estado_asistencia === ESTADOS_ASISTENCIA.PRESENTE || r.estado_asistencia === ESTADOS_ASISTENCIA.TARDANZA)
