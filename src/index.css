@@ -345,3 +345,53 @@
 div[role="status"] {
   font-family: 'DM Sans', system-ui, sans-serif !important;
 }
+
+/* ====== Temas visuales ====== */
+body.tema-visual-minimalista {
+  background: #F8FAFC;
+  --tema-surface: #FFFFFF;
+  --tema-card: rgba(255,255,255,0.8);
+  --tema-text: #0F172A;
+}
+body.tema-visual-gamer {
+  background: radial-gradient(circle at 20% 20%, rgba(255,61,127,0.18), transparent 55%),
+              radial-gradient(circle at 80% 30%, rgba(255,209,102,0.12), transparent 60%),
+              #0F0F1E;
+  color: #F8FAFC;
+  --tema-surface: #0F0F1E;
+  --tema-card: rgba(255,255,255,0.06);
+  --tema-text: #F8FAFC;
+}
+body.tema-visual-neon {
+  background: radial-gradient(circle at 50% 0%, rgba(34,211,238,0.25), transparent 60%),
+              radial-gradient(circle at 80% 100%, rgba(168,85,247,0.2), transparent 65%),
+              #0B1024;
+  color: #F8FAFC;
+  --tema-surface: #0B1024;
+  --tema-card: rgba(255,255,255,0.06);
+  --tema-text: #F8FAFC;
+}
+body.tema-visual-sci_fi {
+  background: linear-gradient(135deg, #021024 0%, #00121E 100%);
+  color: #E0F7FA;
+  --tema-surface: #021024;
+  --tema-card: rgba(255,255,255,0.06);
+  --tema-text: #E0F7FA;
+}
+body.tema-visual-anime {
+  background: linear-gradient(135deg, #FFF1F8 0%, #FFE3EC 100%);
+  color: #3A1051;
+  --tema-surface: #FFF1F8;
+  --tema-card: rgba(255,255,255,0.85);
+  --tema-text: #3A1051;
+}
+body.decoration-neonglow .card,
+body.decoration-neonglow .neon-target {
+  box-shadow: 0 0 18px rgba(var(--color-primary-500), 0.45);
+}
+body.decoration-scanlines::after {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 999;
+  background: repeating-linear-gradient(180deg, rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.04) 1px, transparent 1px, transparent 3px);
+}
+body[data-animation-intensity="low"] .animate-pulse-glow { animation: none; }

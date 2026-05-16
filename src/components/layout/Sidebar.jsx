@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../features/auth/AuthContext';
 import { ROLES } from '../../utils/constants';
@@ -6,7 +7,8 @@ import {
   HiHome, HiUsers, HiAcademicCap, HiCalendar, HiBookOpen, HiUserGroup,
   HiClipboardCheck, HiCog, HiDocumentText, HiChat, HiPuzzle, HiChartBar,
   HiCreditCard, HiQrcode, HiClock, HiStar, HiMicrophone, HiUser, HiCollection,
-  HiClipboardList
+  HiClipboardList, HiSparkles, HiBadgeCheck, HiLightningBolt,
+  HiVolumeUp, HiMusicNote, HiUserCircle, HiColorSwatch
 } from 'react-icons/hi';
 
 const menuAdmin = [
@@ -27,8 +29,15 @@ const menuAdmin = [
   { to: '/admin/trivia', label: 'Trivia', icono: HiPuzzle },
   { to: '/admin/historial-trivia', label: 'Historial Trivia', icono: HiClock },
   { to: '/admin/ranking', label: 'Ranking', icono: HiStar },
+  { to: '/admin/sistema-sonidos', label: 'Sonidos del Sistema', icono: HiVolumeUp },
+  { to: '/admin/musica', label: 'Música de Trivia', icono: HiMusicNote },
+  { to: '/admin/avatares', label: 'Avatares y Marcos', icono: HiUserCircle },
+  { to: '/admin/temas-visuales', label: 'Temas Visuales', icono: HiColorSwatch },
   { to: '/admin/podcast', label: 'Podcast', icono: HiMicrophone },
   { to: '/admin/biblioteca', label: 'Biblioteca', icono: HiCollection },
+  { to: '/admin/concursos', label: 'Concursos', icono: HiSparkles },
+  { to: '/admin/concursos-historial', label: 'Historial Concursos', icono: HiLightningBolt },
+  { to: '/admin/concursos-ranking', label: 'Ranking Concursos', icono: HiBadgeCheck },
 ];
 
 const menuDocente = [
@@ -48,6 +57,7 @@ const menuDocente = [
   { to: '/docente/ranking', label: 'Ranking', icono: HiStar },
   { to: '/docente/podcast', label: 'Podcast', icono: HiMicrophone },
   { to: '/docente/biblioteca', label: 'Biblioteca', icono: HiCollection },
+  { to: '/docente/concursos', label: 'Concursos', icono: HiSparkles },
 ];
 
 const menuAlumno = [
@@ -58,7 +68,9 @@ const menuAlumno = [
   { to: '/alumno/asistencia', label: 'Mi Asistencia', icono: HiClipboardCheck },
   { to: '/alumno/carnet', label: 'Mi Carnet', icono: HiQrcode },
   { to: '/alumno/perfil', label: 'Mi Perfil', icono: HiUser },
+  { to: '/alumno/identidad', label: 'Identidad Visual', icono: HiUserCircle },
   { to: '/alumno/biblioteca', label: 'Biblioteca', icono: HiCollection },
+  { to: '/alumno/concursos', label: 'Concursos', icono: HiSparkles },
 ];
 
 const getMenuByRol = (rol) => {
@@ -70,9 +82,25 @@ const getMenuByRol = (rol) => {
   }
 };
 
+const STORAGE_KEY_LOGOS_FALLIDOS = 'logos_fallidos';
+
+const leerLogosFallidos = () => {
+  try { return new Set(JSON.parse(sessionStorage.getItem(STORAGE_KEY_LOGOS_FALLIDOS) || '[]')); }
+  catch { return new Set(); }
+};
+
+const marcarLogoFallido = (url) => {
+  const s = leerLogosFallidos();
+  s.add(url);
+  try { sessionStorage.setItem(STORAGE_KEY_LOGOS_FALLIDOS, JSON.stringify([...s])); } catch { /* ignore */ }
+};
+
 export default function Sidebar({ abierto, cerrar }) {
   const { usuario, configSistema } = useAuth();
   const menu = getMenuByRol(usuario?.rol);
+  const logoUrl = configSistema?.logo || null;
+  const [logoFallido, setLogoFallido] = useState(() => !!logoUrl && leerLogosFallidos().has(logoUrl));
+  const mostrarLogo = !!logoUrl && !logoFallido;
 
   return (
     <>
@@ -97,8 +125,13 @@ export default function Sidebar({ abierto, cerrar }) {
         {/* Brand header */}
         <div className="px-6 py-5 border-b border-white/20">
           <div className="flex items-center gap-3">
-            {configSistema?.logo ? (
-              <img src={getUploadUrl(configSistema.logo)} alt="Logo" className="w-10 h-10 rounded-xl object-contain" />
+            {mostrarLogo ? (
+              <img
+                src={getUploadUrl(logoUrl)}
+                alt="Logo"
+                className="w-10 h-10 rounded-xl object-contain"
+                onError={() => { marcarLogoFallido(logoUrl); setLogoFallido(true); }}
+              />
             ) : (
               <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
                 <span className="text-white font-display font-bold text-sm">CJ</span>

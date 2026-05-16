@@ -29,6 +29,14 @@ import HistorialTriviaAdminPage from '../pages/admin/HistorialTrivia';
 import RankingAdminPage from '../pages/admin/Ranking';
 import PodcastAdminPage from '../pages/admin/Podcast';
 import BibliotecaAdminPage from '../pages/admin/Biblioteca';
+import ConcursosAdminPage from '../pages/admin/Concursos';
+import ConcursoEditorAdminPage from '../pages/admin/ConcursoEditor';
+import ConcursosHistorialAdminPage from '../pages/admin/ConcursosHistorial';
+import ConcursosRankingAdminPage from '../pages/admin/ConcursosRanking';
+import SistemaSonidosAdminPage from '../pages/admin/SistemaSonidos';
+import MusicaCatalogoAdminPage from '../pages/admin/MusicaCatalogo';
+import AvataresCatalogoAdminPage from '../pages/admin/AvataresCatalogo';
+import TemasVisualesAdminPage from '../pages/admin/TemasVisuales';
 
 // Docente
 import DashboardDocente from '../pages/docente/Dashboard';
@@ -47,6 +55,7 @@ import HistorialTriviaDocentePage from '../pages/docente/HistorialTrivia';
 import RankingDocentePage from '../pages/docente/Ranking';
 import PodcastDocentePage from '../pages/docente/Podcast';
 import BibliotecaDocentePage from '../pages/docente/Biblioteca';
+import ConcursosDocentePage from '../pages/docente/Concursos';
 
 // Alumno
 import DashboardAlumno from '../pages/alumno/Dashboard';
@@ -56,7 +65,10 @@ import TriviasAlumnoPage from '../pages/alumno/Trivias';
 import AsistenciaAlumnoPage from '../pages/alumno/Asistencia';
 import CarnetAlumnoPage from '../pages/alumno/Carnet';
 import PerfilAlumnoPage from '../pages/alumno/Perfil';
+import IdentidadVisual from '../pages/alumno/IdentidadVisual';
 import BibliotecaAlumnoPage from '../pages/alumno/Biblioteca';
+import ConcursosAlumnoPage from '../pages/alumno/Concursos';
+import JugarConcursoPage from '../pages/concursos/JugarConcurso';
 
 export default function AppRoutes() {
   const { usuario } = useAuth();
@@ -95,6 +107,15 @@ export default function AppRoutes() {
         <Route path="ranking" element={<RankingAdminPage />} />
         <Route path="podcast" element={<PodcastAdminPage />} />
         <Route path="biblioteca" element={<BibliotecaAdminPage />} />
+        <Route path="concursos" element={<ConcursosAdminPage />} />
+        <Route path="concursos/:id" element={<ConcursoEditorAdminPage />} />
+        <Route path="concursos/:idConcurso/jugar" element={<JugarConcursoPage />} />
+        <Route path="concursos-historial" element={<ConcursosHistorialAdminPage />} />
+        <Route path="concursos-ranking" element={<ConcursosRankingAdminPage />} />
+        <Route path="sistema-sonidos" element={<SistemaSonidosAdminPage />} />
+        <Route path="musica" element={<MusicaCatalogoAdminPage />} />
+        <Route path="avatares" element={<AvataresCatalogoAdminPage />} />
+        <Route path="temas-visuales" element={<TemasVisualesAdminPage />} />
       </Route>
 
       {/* Docente */}
@@ -119,6 +140,8 @@ export default function AppRoutes() {
         <Route path="ranking" element={<RankingDocentePage />} />
         <Route path="podcast" element={<PodcastDocentePage />} />
         <Route path="biblioteca" element={<BibliotecaDocentePage />} />
+        <Route path="concursos" element={<ConcursosDocentePage />} />
+        <Route path="concursos/:idConcurso/jugar" element={<JugarConcursoPage />} />
       </Route>
 
       {/* Alumno */}
@@ -134,7 +157,10 @@ export default function AppRoutes() {
         <Route path="asistencia" element={<AsistenciaAlumnoPage />} />
         <Route path="carnet" element={<CarnetAlumnoPage />} />
         <Route path="perfil" element={<PerfilAlumnoPage />} />
+        <Route path="identidad" element={<IdentidadVisual />} />
         <Route path="biblioteca" element={<BibliotecaAlumnoPage />} />
+        <Route path="concursos" element={<ConcursosAlumnoPage />} />
+        <Route path="concursos/:idConcurso/jugar" element={<JugarConcursoPage />} />
       </Route>
 
       {/* Redirect root */}

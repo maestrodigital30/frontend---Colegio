@@ -1,9 +1,23 @@
 import { useState, useEffect } from 'react';
 import apiClient from '../../services/apiClient';
 import InputCampo from '../../components/common/InputCampo';
+import AvatarAlumno from '../../components/alumnos/AvatarAlumno';
 import { formatearFechaHora } from '../../utils/formatters';
 import { MODALIDADES_TRIVIA } from '../../utils/constants';
 import { HiChevronDown, HiChevronUp, HiStar, HiX, HiCheckCircle, HiXCircle, HiClock, HiUserGroup, HiPuzzle } from 'react-icons/hi';
+
+function identidadDeParticipante(p) {
+  if (p?.tbl_alumnos?.tbl_alumno_identidad_visual) {
+    const id = p.tbl_alumnos.tbl_alumno_identidad_visual;
+    return { avatar: id.avatar, personaje: id.personaje, marco: id.marco, color_personal: id.color_personal };
+  }
+  return {
+    avatar: p?.avatar_publico || null,
+    personaje: p?.personaje_publico || null,
+    marco: p?.marco_publico || null,
+    color_publico: p?.color_publico || null,
+  };
+}
 
 export default function HistorialTriviaPage() {
   const [cursos, setCursos] = useState([]);
@@ -129,6 +143,7 @@ export default function HistorialTriviaPage() {
                             <span className="text-sm font-bold w-7 text-center text-slate-400">
                               {idx === 0 ? '\u{1F947}' : idx === 1 ? '\u{1F948}' : idx === 2 ? '\u{1F949}' : `${idx + 1}`}
                             </span>
+                            <AvatarAlumno identidad={identidadDeParticipante(part)} size="sm" />
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-bold text-black truncate">
                                 {part.etiqueta_participante || `${part.tbl_alumnos?.apellidos || ''}, ${part.tbl_alumnos?.nombres || ''}`}
@@ -160,13 +175,18 @@ export default function HistorialTriviaPage() {
           <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4" style={{ background: 'linear-gradient(135deg, #0060FF 0%, #87CEEB 100%)', borderBottom: '2px solid #87CEEB' }}>
-              <div>
-                <h3 className="text-lg font-display font-bold text-white">
-                  {modalDetalle.participante?.etiqueta_participante || `${modalDetalle.participante?.tbl_alumnos?.apellidos || ''}, ${modalDetalle.participante?.tbl_alumnos?.nombres || ''}`}
-                </h3>
-                <p className="text-sm text-white/80">
-                  Puntaje: <span className="font-bold text-white">{parseFloat(modalDetalle.participante?.puntaje_final || 0).toFixed(1)} pts</span>
-                </p>
+              <div className="flex items-center gap-3">
+                {modalDetalle.participante && (
+                  <AvatarAlumno identidad={identidadDeParticipante(modalDetalle.participante)} size="md" />
+                )}
+                <div>
+                  <h3 className="text-lg font-display font-bold text-white">
+                    {modalDetalle.participante?.etiqueta_participante || `${modalDetalle.participante?.tbl_alumnos?.apellidos || ''}, ${modalDetalle.participante?.tbl_alumnos?.nombres || ''}`}
+                  </h3>
+                  <p className="text-sm text-white/80">
+                    Puntaje: <span className="font-bold text-white">{parseFloat(modalDetalle.participante?.puntaje_final || 0).toFixed(1)} pts</span>
+                  </p>
+                </div>
               </div>
               <button onClick={() => setModalDetalle(null)} className="p-1.5 rounded-lg hover:bg-white/20 transition-colors">
                 <HiX className="w-5 h-5 text-white" />

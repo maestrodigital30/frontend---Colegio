@@ -26,8 +26,8 @@ triviaClient.interceptors.response.use(
   }
 );
 
-export const validarAccesoTrivia = (codigoTrivia, dni) =>
-  triviaClient.post('/validar-acceso', { codigo_trivia: codigoTrivia, dni }).then((r) => r.data);
+export const validarAccesoTrivia = (codigoTrivia, dni, extras = {}) =>
+  triviaClient.post('/validar-acceso', { codigo_trivia: codigoTrivia, dni, ...extras }).then((r) => r.data);
 
 export const obtenerPartidaTrivia = () =>
   triviaClient.get('/partida').then((r) => r.data);

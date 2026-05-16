@@ -2,8 +2,20 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import apiClient from '../../services/apiClient';
 import InputCampo from '../../components/common/InputCampo';
+import AvatarAlumno from '../../components/alumnos/AvatarAlumno';
 import { formatearFechaHora } from '../../utils/formatters';
 import { HiX, HiChevronRight } from 'react-icons/hi';
+
+function identidadDeRanking(entry) {
+  const iv = entry?.tbl_alumno_identidad_visual;
+  if (!iv) return null;
+  return {
+    avatar: iv.avatar || null,
+    personaje: iv.personaje || null,
+    marco: iv.marco || null,
+    color_personal: iv.color_personal || null,
+  };
+}
 
 export default function RankingPage() {
   const [cursos, setCursos] = useState([]);
@@ -63,6 +75,7 @@ export default function RankingPage() {
                   <span className={`text-2xl font-bold w-10 text-center ${idx === 0 ? 'text-yellow-500' : idx === 1 ? 'text-slate-400' : idx === 2 ? 'text-primary-700' : 'text-slate-400'}`}>
                     {idx < 3 ? ['\u{1F947}', '\u{1F948}', '\u{1F949}'][idx] : `#${idx + 1}`}
                   </span>
+                  <AvatarAlumno identidad={identidadDeRanking(r)} size="sm" />
                   <div className="flex-1">
                     <p className="text-sm font-medium text-slate-800">{r.apellidos}, {r.nombres}</p>
                   </div>
@@ -83,9 +96,12 @@ export default function RankingPage() {
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] flex items-center justify-center p-4" onClick={() => setModalAlumno(null)}>
           <div className="bg-white rounded-2xl shadow-2xl w-[95vw] max-w-6xl h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-              <div>
-                <h3 className="text-lg font-display font-bold text-slate-800">{modalAlumno.apellidos}, {modalAlumno.nombres}</h3>
-                <p className="text-sm text-slate-500">Total: <span className="font-semibold text-primary">{(modalAlumno.puntaje_acumulado || 0).toFixed(1)} pts</span></p>
+              <div className="flex items-center gap-3">
+                <AvatarAlumno identidad={identidadDeRanking(modalAlumno)} size="md" />
+                <div>
+                  <h3 className="text-lg font-display font-bold text-slate-800">{modalAlumno.apellidos}, {modalAlumno.nombres}</h3>
+                  <p className="text-sm text-slate-500">Total: <span className="font-semibold text-primary">{(modalAlumno.puntaje_acumulado || 0).toFixed(1)} pts</span></p>
+                </div>
               </div>
               <button onClick={() => setModalAlumno(null)} className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors">
                 <HiX className="w-5 h-5 text-slate-500" />

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { validarAccesoTrivia } from '../../services/triviaPublicaService';
 import { obtenerConfiguracionPublica } from '../../services/authService';
+import { listarAvataresPublicos } from '../../services/avatarCatalogoService';
 import { getUploadUrl } from '../../utils/storage';
 import { applyThemeColors, DEFAULT_COLORS } from '../../utils/colorUtils';
 import toast from 'react-hot-toast';
@@ -12,7 +13,13 @@ export default function TriviaAcceso() {
   const [cargando, setCargando] = useState(false);
   const [config, setConfig] = useState(null);
   const [mensajeSesion, setMensajeSesion] = useState('');
+  const [avataresPub, setAvataresPub] = useState([]);
+  const [idAvatarPub, setIdAvatarPub] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    listarAvataresPublicos().then(setAvataresPub).catch(() => {});
+  }, []);
 
   useEffect(() => {
     const token = sessionStorage.getItem('trivia_token');
@@ -58,7 +65,9 @@ export default function TriviaAcceso() {
     setCargando(true);
     setMensajeSesion('');
     try {
-      const data = await validarAccesoTrivia(codigoFinal, dni);
+      const data = await validarAccesoTrivia(codigoFinal, dni, {
+        id_avatar_publico: idAvatarPub,
+      });
       sessionStorage.setItem('trivia_token', data.token);
       sessionStorage.setItem('trivia_data', JSON.stringify(data));
       toast.success(`Bienvenido/a, ${data.nombre_alumno}`);
@@ -133,6 +142,32 @@ export default function TriviaAcceso() {
                 maxLength={8}
               />
             </div>
+
+            {avataresPub.length > 0 && (
+              <div className="animate-fade-up" style={{ animationDelay: '0.38s' }}>
+                <label className="block text-xs font-display font-medium text-slate-500 mb-1.5 uppercase tracking-wider">Elige tu avatar (opcional)</label>
+                <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 max-h-44 overflow-y-auto p-1">
+                  {avataresPub.map((av) => {
+                    const seleccionado = idAvatarPub === av.id;
+                    return (
+                      <button
+                        key={av.id}
+                        type="button"
+                        onClick={() => setIdAvatarPub(seleccionado ? null : av.id)}
+                        className={`relative rounded-xl p-1.5 border-2 transition-all ${seleccionado ? 'border-purple-500 ring-2 ring-purple-300 bg-purple-50' : 'border-slate-200 hover:border-slate-300 bg-white'}`}
+                        title={av.nombre}
+                      >
+                        <img
+                          src={getUploadUrl(av.ruta_archivo)}
+                          alt={av.nombre}
+                          className="w-full h-12 object-contain"
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <div className="animate-fade-up" style={{ animationDelay: '0.4s' }}>
               <button

@@ -1,8 +1,21 @@
 import { useState, useEffect } from 'react';
 import { HiPuzzle, HiCheckCircle, HiXCircle, HiChevronDown, HiChevronUp } from 'react-icons/hi';
 import apiClient from '../../services/apiClient';
+import AvatarAlumno from '../../components/alumnos/AvatarAlumno';
+import { useIdentidadVisual } from '../../contexts/IdentidadVisualContext';
+
+function identidadDePropia(identidad) {
+  if (!identidad) return null;
+  return {
+    avatar: identidad.avatar || null,
+    personaje: identidad.personaje || null,
+    marco: identidad.marco || null,
+    color_personal: identidad.color_personal || null,
+  };
+}
 
 export default function TriviasAlumnoPage() {
+  const { identidad: identidadPropia } = useIdentidadVisual();
   const [trivias, setTrivias] = useState([]);
   const [detalle, setDetalle] = useState(null);
   const [detalleId, setDetalleId] = useState(null);
@@ -68,9 +81,13 @@ export default function TriviasAlumnoPage() {
                   onClick={() => partida && verDetalle(partida.id)}
                 >
                   <div className="flex items-center gap-4">
-                    <div className={`p-3 rounded-xl ${t.es_ganador ? 'bg-amber-100 text-amber-600' : 'bg-primary-100 text-primary-600'}`}>
-                      <HiPuzzle className="w-5 h-5" />
-                    </div>
+                    {identidadDePropia(identidadPropia) ? (
+                      <AvatarAlumno identidad={identidadDePropia(identidadPropia)} size="md" />
+                    ) : (
+                      <div className={`p-3 rounded-xl ${t.es_ganador ? 'bg-amber-100 text-amber-600' : 'bg-primary-100 text-primary-600'}`}>
+                        <HiPuzzle className="w-5 h-5" />
+                      </div>
+                    )}
                     <div>
                       <h3 className="font-display font-semibold text-black font-bold text-sm">
                         {partida?.tbl_trivia_temas?.nombre || 'Trivia'}

@@ -51,6 +51,11 @@ export default {
         'glass-hover': 'rgba(0, 0, 0, 0.05)',
         'glass-active': 'rgba(0, 0, 0, 0.07)',
         'glass-strong': 'rgba(0, 0, 0, 0.08)',
+        'tema-surface': 'var(--tema-surface, #FFFFFF)',
+        'tema-card': 'var(--tema-card, rgba(255,255,255,0.7))',
+      },
+      textColor: {
+        'tema-text': 'var(--tema-text, #0F172A)',
       },
       animation: {
         'fade-up': 'fadeSlideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both',

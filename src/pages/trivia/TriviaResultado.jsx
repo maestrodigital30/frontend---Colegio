@@ -1,7 +1,30 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { obtenerResultadoTrivia, obtenerRankingTrivia } from '../../services/triviaPublicaService';
+import audioService from '../../services/audioService';
+import useAudioCleanup from '../../hooks/useAudioCleanup';
+import AvatarAlumno from '../../components/alumnos/AvatarAlumno';
 import toast from 'react-hot-toast';
+
+function identidadDeRankingEntry(e) {
+  if (e?.identidad_visual) {
+    return {
+      avatar: e.identidad_visual.avatar || null,
+      personaje: e.identidad_visual.personaje || null,
+      marco: e.identidad_visual.marco || null,
+      color_personal: e.identidad_visual.color_personal || null,
+    };
+  }
+  if (e?.identidad_publica) {
+    return {
+      avatar: e.identidad_publica.avatar_publico || null,
+      personaje: e.identidad_publica.personaje_publico || null,
+      marco: e.identidad_publica.marco_publico || null,
+      color_publico: e.identidad_publica.color_publico || null,
+    };
+  }
+  return null;
+}
 
 export default function TriviaResultado() {
   const [resultado, setResultado] = useState(null);
@@ -9,14 +32,24 @@ export default function TriviaResultado() {
   const [cargando, setCargando] = useState(true);
   const navigate = useNavigate();
 
+  useAudioCleanup();
+
   useEffect(() => {
     const token = sessionStorage.getItem('trivia_token');
     if (!token) { navigate('/trivia'); return; }
+
+    // Detener música al montar
+    audioService.stopMusic();
 
     const cargar = async () => {
       try {
         const res = await obtenerResultadoTrivia();
         setResultado(res);
+        // Sonido de victoria si hay puntaje > 0 o flag ganador
+        const puntaje = res?.puntaje_final ?? 0;
+        if (res?.es_ganador || puntaje > 0) {
+          audioService.playSfx('victoria');
+        }
         if (res.config_visualizacion.mostrar_ranking) {
           try { setRanking(await obtenerRankingTrivia()); } catch { /* not available */ }
         }
@@ -46,15 +79,29 @@ export default function TriviaResultado() {
 
   if (!resultado) return null;
   const { config_visualizacion: config } = resultado;
+  const identidad = (resultado.avatar_publico || resultado.personaje_publico || resultado.marco_publico || resultado.color_publico)
+    ? {
+        avatar: resultado.avatar_publico,
+        personaje: resultado.personaje_publico,
+        marco: resultado.marco_publico,
+        color_publico: resultado.color_publico,
+      }
+    : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 p-4">
       <div className="max-w-2xl mx-auto pt-8">
         {/* Header */}
         <div className="text-center mb-8 animate-fade-up">
-          <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center">
-            <span className="text-4xl">{config.mostrar_puntaje && resultado.puntaje_final > 0 ? '🎉' : '📋'}</span>
-          </div>
+          {identidad ? (
+            <div className="flex justify-center mb-4">
+              <AvatarAlumno identidad={identidad} size="lg" />
+            </div>
+          ) : (
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center">
+              <span className="text-4xl">{config.mostrar_puntaje && resultado.puntaje_final > 0 ? '🎉' : '📋'}</span>
+            </div>
+          )}
           <h1 className="text-3xl font-display font-bold text-white">Trivia Completada</h1>
           <p className="text-white/60 mt-1">{resultado.nombre_alumno}</p>
         </div>
@@ -98,15 +145,19 @@ export default function TriviaResultado() {
           <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-4 border border-white/10 animate-fade-up" style={{ animationDelay: '0.3s' }}>
             <h2 className="text-lg font-bold text-white mb-4">Ranking</h2>
             <div className="space-y-2">
-              {ranking.map((r) => (
-                <div key={r.posicion} className={`flex items-center justify-between p-3 rounded-xl ${r.es_actual ? 'bg-purple-500/30 border border-purple-400/50' : 'bg-white/5'}`}>
-                  <div className="flex items-center gap-3">
-                    <span className="text-lg w-8 text-center">{r.posicion === 1 ? '🥇' : r.posicion === 2 ? '🥈' : r.posicion === 3 ? '🥉' : r.posicion}</span>
-                    <span className={`text-sm font-medium ${r.es_actual ? 'text-purple-200' : 'text-white/70'}`}>{r.nombre} {r.es_actual && '(Tu)'}</span>
+              {ranking.map((r) => {
+                const identidadRow = identidadDeRankingEntry(r);
+                return (
+                  <div key={r.posicion} className={`flex items-center justify-between p-3 rounded-xl ${r.es_actual ? 'bg-purple-500/30 border border-purple-400/50' : 'bg-white/5'}`}>
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg w-8 text-center">{r.posicion === 1 ? '🥇' : r.posicion === 2 ? '🥈' : r.posicion === 3 ? '🥉' : r.posicion}</span>
+                      {identidadRow && <AvatarAlumno identidad={identidadRow} size="sm" />}
+                      <span className={`text-sm font-medium ${r.es_actual ? 'text-purple-200' : 'text-white/70'}`}>{r.nombre} {r.es_actual && '(Tu)'}</span>
+                    </div>
+                    <span className="text-white font-bold">{r.puntaje.toFixed(1)}</span>
                   </div>
-                  <span className="text-white font-bold">{r.puntaje.toFixed(1)}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

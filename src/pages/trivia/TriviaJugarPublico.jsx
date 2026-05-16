@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { obtenerPreguntaTrivia, responderPreguntaTrivia, obtenerPartidaTrivia } from '../../services/triviaPublicaService';
+import { listarSonidos } from '../../services/sistemaSonidoService';
+import audioService from '../../services/audioService';
+import useAudioCleanup from '../../hooks/useAudioCleanup';
+import { getUploadUrl } from '../../utils/storage';
 import toast from 'react-hot-toast';
 
 export default function TriviaJugarPublico() {
@@ -11,9 +15,14 @@ export default function TriviaJugarPublico() {
   const [feedback, setFeedback] = useState(null);
   const [puntaje, setPuntaje] = useState(0);
   const [cargando, setCargando] = useState(true);
+  const [muteFlag, setMuteFlag] = useState(0); // forzar rerender al mutear
   const timerRef = useRef(null);
   const feedbackTimeoutRef = useRef(null);
+  const rachaRef = useRef(0);
+  const prevTimerRef = useRef(null);
   const navigate = useNavigate();
+
+  useAudioCleanup();
 
   const limpiarTimer = useCallback(() => {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
@@ -22,6 +31,7 @@ export default function TriviaJugarPublico() {
   const iniciarTimer = useCallback((tiempo) => {
     limpiarTimer();
     setTimer(tiempo);
+    prevTimerRef.current = tiempo;
     timerRef.current = setInterval(() => {
       setTimer((prev) => {
         if (prev <= 1) { clearInterval(timerRef.current); timerRef.current = null; return 0; }
@@ -55,6 +65,13 @@ export default function TriviaJugarPublico() {
         const partidaData = await obtenerPartidaTrivia();
         setPartida(partidaData);
         setPuntaje(partidaData.puntaje_acumulado || 0);
+
+        // Cargar sonidos del sistema y música de fondo
+        listarSonidos().then(s => audioService.setSounds(s)).catch(() => {});
+        if (partidaData?.tbl_musica_fondo_catalogo?.ruta_archivo) {
+          audioService.playMusic(partidaData.tbl_musica_fondo_catalogo.ruta_archivo);
+        }
+
         await cargarPregunta();
       } catch {
         toast.error('Error al cargar trivia');
@@ -74,6 +91,14 @@ export default function TriviaJugarPublico() {
   // Auto-submit when timer hits 0
   const timerHitZeroRef = useRef(false);
   useEffect(() => {
+    // Cuenta regresiva: lanzar SFX una vez por tick cuando timer baja en zona crítica
+    if (timer > 0 && timer <= 3 && prevTimerRef.current !== timer) {
+      prevTimerRef.current = timer;
+      audioService.playSfx('cuenta_regresiva');
+    } else if (timer > 3) {
+      prevTimerRef.current = timer;
+    }
+
     if (timer === 0 && pregunta && !respondiendo && !feedback && !timerHitZeroRef.current) {
       timerHitZeroRef.current = true;
       handleResponder(null);
@@ -91,17 +116,35 @@ export default function TriviaJugarPublico() {
       setFeedback({ es_correcta: resultado.es_correcta, id_opcion: idOpcion });
       setPuntaje(resultado.puntaje_acumulado);
 
+      // Audio feedback
+      if (resultado.es_correcta) {
+        rachaRef.current += 1;
+        audioService.playSfx('correcto');
+        if (rachaRef.current >= 3) {
+          audioService.playSfx('racha');
+        }
+      } else {
+        rachaRef.current = 0;
+        audioService.playSfx('incorrecto');
+      }
+
       feedbackTimeoutRef.current = setTimeout(() => {
         if (resultado.es_ultima_pregunta) {
+          // El sonido de victoria se reproducirá en TriviaResultado
           navigate('/trivia/resultado');
         } else {
           cargarPregunta();
         }
       }, 1500);
-    } catch (error) {
+    } catch {
       toast.error('Error al enviar respuesta');
       setRespondiendo(false);
     }
+  };
+
+  const toggleMute = () => {
+    audioService.toggleMusica(!audioService.isMusicaEnabled());
+    setMuteFlag(f => f + 1);
   };
 
   if (cargando) {
@@ -125,9 +168,29 @@ export default function TriviaJugarPublico() {
     'from-primary-500 to-primary-600',
     'from-rose-500 to-rose-600',
   ];
+  const imagenes = partida?.tbl_trivia_imagenes || [];
+  const musicaEnabled = audioService.isMusicaEnabled();
+  void muteFlag;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 p-4 flex flex-col">
+      {/* Botón mute */}
+      <button
+        onClick={toggleMute}
+        className="fixed top-4 right-4 z-50 w-10 h-10 rounded-full bg-white/10 backdrop-blur border border-white/20 text-white hover:bg-white/20 transition-all flex items-center justify-center"
+        title={musicaEnabled ? 'Silenciar música' : 'Activar música'}
+      >
+        {musicaEnabled ? (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072M19.07 4.93a10 10 0 010 14.14M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+          </svg>
+        ) : (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l4-4m0 4l-4-4" />
+          </svg>
+        )}
+      </button>
+
       {/* Header */}
       <div className="max-w-3xl mx-auto w-full mb-6">
         <div className="flex items-center justify-between text-white/70 text-sm mb-2">
@@ -140,6 +203,20 @@ export default function TriviaJugarPublico() {
             <div className="bg-gradient-to-r from-purple-400 to-indigo-400 h-2 rounded-full transition-all duration-500" style={{ width: `${progreso}%` }} />
           </div>
         </div>
+
+        {/* Carrusel/grid de imágenes decorativas */}
+        {imagenes.length > 0 && (
+          <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
+            {imagenes.map((img) => (
+              <img
+                key={img.id}
+                src={getUploadUrl(img.ruta_archivo)}
+                alt=""
+                className="h-16 w-auto rounded-lg border border-white/10 object-cover flex-shrink-0"
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Timer */}

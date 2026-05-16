@@ -64,6 +64,33 @@ export const TIPOS_VALOR_ANTROPOMETRICO = {
   TEXTO: 'texto',
 };
 
+export const CONCURSOS = {
+  MIN_OPCIONES: 2,
+  MAX_OPCIONES: 6,
+  ORDEN_FIJO: 'fijo',
+  ORDEN_ALEATORIO: 'aleatorio',
+  TEMAS_VISUALES: [
+    { value: 'clasico', label: 'Clasico', acento: '#facc15', primario: '#0f172a', secundario: '#7e22ce' },
+    { value: 'neon',    label: 'Neon',    acento: '#22d3ee', primario: '#0a0a0f', secundario: '#ec4899' },
+    { value: 'kids',    label: 'Kids',    acento: '#f97316', primario: '#0ea5e9', secundario: '#10b981' },
+    { value: 'retro',   label: 'Retro',   acento: '#fbbf24', primario: '#7c2d12', secundario: '#ea580c' },
+  ],
+  ESTADOS_INTENTO: {
+    EN_PROGRESO: 'en_progreso',
+    FINALIZADO: 'finalizado',
+    ABANDONADO: 'abandonado',
+  },
+  MULTIMEDIA_TIPOS: ['imagen', 'video'],
+  MULTIMEDIA_MAX_BYTES: 50 * 1024 * 1024,
+  MULTIMEDIA_EXT_IMAGEN: ['.jpg', '.jpeg', '.png', '.gif', '.webp'],
+  MULTIMEDIA_EXT_VIDEO: ['.mp4', '.webm', '.ogg', '.mov'],
+  COMODINES: {
+    CINCUENTA: '50_50',
+    TIEMPO_EXTRA: 'tiempo_extra',
+    DOBLE_PUNTAJE: 'doble_puntaje',
+  },
+};
+
 export const ES_DESARROLLO = import.meta.env.DEV;
 
 export const API_URL = import.meta.env.VITE_API_URL;

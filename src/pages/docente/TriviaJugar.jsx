@@ -5,6 +5,11 @@ import InputCampo from '../../components/common/InputCampo';
 import { MODALIDADES_TRIVIA, PUNTAJES_TRIVIA, ESTADOS_ASISTENCIA, MODALIDADES_ACCESO_TRIVIA } from '../../utils/constants';
 import Modal from '../../components/common/Modal';
 import toast from 'react-hot-toast';
+import EditorMultimediaTrivia from '../../components/trivia/EditorMultimediaTrivia';
+import { listarSonidos } from '../../services/sistemaSonidoService';
+import audioService from '../../services/audioService';
+import useAudioCleanup from '../../hooks/useAudioCleanup';
+import { getUploadUrl } from '../../utils/storage';
 
 export default function TriviaJugarPage() {
   // Setup
@@ -29,6 +34,9 @@ export default function TriviaJugarPage() {
   const [codigoGenerado, setCodigoGenerado] = useState('');
   const [modalCodigo, setModalCodigo] = useState(false);
 
+  // Multimedia
+  const [idMusicaFondo, setIdMusicaFondo] = useState(null);
+
   // Game
   const [partida, setPartida] = useState(null);
   const [fase, setFase] = useState('setup'); // setup, playing, results
@@ -37,7 +45,13 @@ export default function TriviaJugarPage() {
   const [respuestas, setRespuestas] = useState({});
   const [participanteActual, setParticipanteActual] = useState(0);
   const [resultados, setResultados] = useState(null);
+  const [multimedia, setMultimedia] = useState(null); // { tbl_trivia_imagenes, tbl_musica_fondo_catalogo }
+  const [muteFlag, setMuteFlag] = useState(0);
   const timerRef = useRef(null);
+  const rachaRef = useRef(0);
+  const prevTimerRef = useRef(null);
+
+  useAudioCleanup();
 
   useEffect(() => {
     apiClient.get('/cursos').then(({ data }) => setCursos(data)).catch(() => {});
@@ -164,6 +178,7 @@ export default function TriviaJugarPage() {
         mostrar_ranking: mostrarRanking,
         cantidad_preguntas: cantidadPreguntas,
         cantidad_grupos: modalidad === MODALIDADES_TRIVIA.GRUPOS ? cantidadGrupos : null,
+        id_musica_fondo: idMusicaFondo ?? null,
         participantes: (modalidadAcceso === MODALIDADES_ACCESO_TRIVIA.EN_VIVO || modalidad !== MODALIDADES_TRIVIA.INDIVIDUAL) ? participantesPayload : undefined,
       });
 
@@ -180,6 +195,17 @@ export default function TriviaJugarPage() {
       await apiClient.post(`/trivia/partidas/${data.id}/iniciar`);
       const { data: partidaCompleta } = await apiClient.get(`/trivia/partidas/${data.id}`);
       setPartida(partidaCompleta);
+
+      // Cargar multimedia (imágenes + música) por endpoint dedicado
+      try {
+        const { data: multimediaData } = await apiClient.get(`/trivia/partidas/${data.id}/multimedia`);
+        setMultimedia(multimediaData);
+        listarSonidos().then(s => audioService.setSounds(s)).catch(() => {});
+        if (multimediaData?.tbl_musica_fondo_catalogo?.ruta_archivo) {
+          audioService.playMusic(multimediaData.tbl_musica_fondo_catalogo.ruta_archivo);
+        }
+      } catch { /* multimedia es opcional */ }
+
       setFase('playing');
       setPreguntaActual(0);
       setParticipanteActual(0);
@@ -231,6 +257,16 @@ export default function TriviaJugarPage() {
       });
     } catch { /* continue */ }
 
+    // Audio feedback
+    if (esCorrecta) {
+      rachaRef.current += 1;
+      audioService.playSfx('correcto');
+      if (rachaRef.current >= 3) audioService.playSfx('racha');
+    } else {
+      rachaRef.current = 0;
+      audioService.playSfx('incorrecto');
+    }
+
     const key = `${participanteActual}-${preguntaActual}`;
     setRespuestas(prev => ({ ...prev, [key]: { idOpcion, esCorrecta } }));
     avanzar();
@@ -253,7 +289,15 @@ export default function TriviaJugarPage() {
   };
 
   useEffect(() => {
-    if (fase === 'playing' && timer === 0) {
+    if (fase !== 'playing') return;
+    // Cuenta regresiva: SFX cuando timer baja en zona crítica (3..1)
+    if (timer > 0 && timer <= 3 && prevTimerRef.current !== timer) {
+      prevTimerRef.current = timer;
+      audioService.playSfx('cuenta_regresiva');
+    } else if (timer > 3) {
+      prevTimerRef.current = timer;
+    }
+    if (timer === 0) {
       tiempoAgotado();
     }
   }, [timer, fase]);
@@ -290,8 +334,11 @@ export default function TriviaJugarPage() {
 
   const finalizarPartida = async () => {
     if (timerRef.current) clearInterval(timerRef.current);
+    audioService.stopMusic();
     try {
       const { data } = await apiClient.post(`/trivia/partidas/${partida.id}/finalizar`);
+      const algunGanador = (data?.participantes || []).some(p => (p.puntaje_final || 0) > 0);
+      if (algunGanador) audioService.playSfx('victoria');
       setResultados(data);
       setFase('results');
     } catch {
@@ -300,9 +347,15 @@ export default function TriviaJugarPage() {
     }
   };
 
+  const toggleMute = () => {
+    audioService.toggleMusica(!audioService.isMusicaEnabled());
+    setMuteFlag(f => f + 1);
+  };
+
   const cancelarPartida = async () => {
     if (!confirm('¿Cancelar la partida?')) return;
     if (timerRef.current) clearInterval(timerRef.current);
+    audioService.stopMusic();
     try {
       await apiClient.post(`/trivia/partidas/${partida.id}/cancelar`);
       toast.success('Partida cancelada');
@@ -310,6 +363,7 @@ export default function TriviaJugarPage() {
     setFase('setup');
     setFaseSetup('config');
     setPartida(null);
+    setMultimedia(null);
   };
 
   const nuevaPartida = () => {
@@ -457,16 +511,50 @@ export default function TriviaJugarPage() {
     const progreso = ((preguntaActual + 1) / preguntas.length) * 100;
     const respuestaActual = respuestas[`${participanteActual}-${preguntaActual}`];
 
+    const imagenesPartida = multimedia?.tbl_trivia_imagenes || [];
+    const musicaEnabled = audioService.isMusicaEnabled();
+    void muteFlag;
+
     return (
       <div className="animate-fade-up">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-xl font-display font-bold text-slate-800">Trivia en Curso</h1>
-          <Boton tipo="danger" onClick={cancelarPartida}>Cancelar</Boton>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleMute}
+              className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 flex items-center justify-center transition-all"
+              title={musicaEnabled ? 'Silenciar música' : 'Activar música'}
+            >
+              {musicaEnabled ? (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072M19.07 4.93a10 10 0 010 14.14M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l4-4m0 4l-4-4" />
+                </svg>
+              )}
+            </button>
+            <Boton tipo="danger" onClick={cancelarPartida}>Cancelar</Boton>
+          </div>
         </div>
 
         <div className="w-full bg-slate-50 rounded-full h-2 mb-4">
           <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${progreso}%` }} />
         </div>
+
+        {imagenesPartida.length > 0 && (
+          <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+            {imagenesPartida.map((img) => (
+              <img
+                key={img.id}
+                src={getUploadUrl(img.ruta_archivo)}
+                alt=""
+                className="h-16 w-auto rounded-lg border border-slate-200 object-cover flex-shrink-0"
+              />
+            ))}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           <div className="lg:col-span-3">
@@ -684,6 +772,12 @@ export default function TriviaJugarPage() {
                 </div>
               </>
             )}
+
+            <EditorMultimediaTrivia
+              idPartida={partida?.id}
+              idMusicaSeleccionada={idMusicaFondo}
+              onCambiarMusica={(id) => setIdMusicaFondo(id)}
+            />
           </div>
         </div>
 
